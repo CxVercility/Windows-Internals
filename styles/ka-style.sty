@@ -1,0 +1,151 @@
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesPackage{styles/ka-style}[2004/10/21  Karlsuhe Paper Styles]
+\RequirePackage{fancyhdr}
+
+\DeclareOption{draft}{\UKa@drafttrue}
+\DeclareOption{final}{\UKa@draftfalse}
+\DeclareOption{thesis}{\UKa@thesistrue}
+\DeclareOption{pdfinfo}{\UKa@pdfinfotrue}
+\DeclareOption{dvipdfm}{\UKa@dvipdfmtrue}
+\DeclareOption{dvips}{\UKa@dvipstrue}
+\DeclareOption{submit}{\UKa@submittrue}
+\DeclareOption{revisiondate}{\UKa@revisiondatetrue}
+\newif\ifUKa@draft
+\newif\ifUKa@thesis
+\newif\ifUKa@pdfinfo
+\newif\ifUKa@dvipdfm
+\newif\ifUKa@dvips
+\newif\ifUKa@submit
+\newif\ifUKa@revisiondate
+\ProcessOptions
+
+%%  We manually insert PDF information via TeX specials, and only if requested.
+%%  This avoids including the fragile hyperref package.  If you want to use
+%%  hyperref, then include it directly in your LaTeX document, since it
+%%  has too many options that shouldn't be hidden behind this style sheet,
+%%  and its inclusion should be *ordered* in comparison to your other
+%%  LaTeX includes.
+%%
+%%  Note: Your document's title and author-list may use complicated LaTeX
+%%  formatting and internationalization, and thus may not be appropriate
+%%  as PDF meta information.  Thus specify the author and title separately
+%%  for the PDF meta information.
+\providecommand{\PdfAuthor}{}
+\providecommand{\PdfTitle}{}
+\providecommand{\PdfInfo}{\relax}
+\ifUKa@pdfinfo
+  \ifUKa@dvipdfm
+    \rewnewcommand{\PdfInfo}{\special{ pdf: docinfo << /Author (\PdfAuthor) /Title (\PdfTitle) >>}}
+  \fi
+  \ifUKa@dvips
+    \renewcommand{\PdfInfo}{\special{ ps: [ /Author (\PdfAuthor) /Title (\PdfTitle) /DOCINFO pdfmark}}
+  \fi
+\fi
+
+
+\ifUKa@thesis
+
+%%
+%% Environment for Abstract
+%%
+\newenvironment{abstract}{%
+\pagestyle{empty}\cleardoublepage{}%
+\null\vfil\begin{center}\textbf{Abstract}\end{center}}
+{\par\vfil\null\cleardoublepage{}\pagestyle{headings}}
+
+
+%%
+%% Environment for Acknowledgements
+%%
+\newenvironment{acknowledgments}{%
+\pagestyle{empty}\cleardoublepage{}%
+\null\vfil\begin{center}\textbf{Acknowledgments}\end{center}}
+{\par\vfil\null\cleardoublepage{}\pagestyle{headings}}
+
+\fi
+
+%%
+%% Draft footer indicating build time and revision of file.
+%%
+\providecommand{\Revision}{Revision: unknown}
+\providecommand{\RevisionDate}{Revision Date: unknown}
+\providecommand{\CopyrightHolder}{University of Karlsruhe}
+\providecommand{\AtConference}{Unspecified Conference}
+\providecommand{\TimeZone}{}
+
+\ifUKa@draft
+  \InputIfFileExists{git}{}{}
+  \InputIfFileExists{timezone}{}{}
+
+  \usepackage{color}
+  \newcommand{\NoComment}[1]{\relax}
+  \newcommand{\Comment}[1]{\textbf{\textsl{#1}}}
+  \newcommand{\Critical}[1]{\textcolor{red}{\textbf{\textsl{#1}}}}
+
+  %% Compute hours and minutes from \time (number of minutes since midnight),
+  %% and define as \hhmm
+  \newcount\hh
+  \newcount\mm
+  \mm=\time
+  \hh=\mm
+  \divide\mm by 60
+  \multiply\mm by 60
+  \mm=-\mm
+  \advance\mm by \hh
+  \divide\hh by 60
+  \def\hhmm{\ifnum\hh<10{}0\fi\number\hh:\ifnum\mm<10{}0\fi\number\mm~\TimeZone}
+  %% Define a footer which uniquely identifies this version.
+  \pagestyle{fancy}
+  \fancyhead{} % Clear the header
+  \fancyfoot{} % Clear the footer
+  \cfoot{\thepage}
+  \rfoot{\scriptsize{
+         \ifUKa@revisiondate
+	   \RevisionDate \\
+	 \else
+           \today{}, \hhmm \\
+	 \fi
+         \ifUKa@submit
+         To be submitted at \AtConference \\
+         \fi
+         \Revision}}
+  \renewcommand{\headrulewidth}{0pt} % No header line
+  \renewcommand{\footrulewidth}{0pt} % No footer line
+\else
+  \newcommand{\NoComment}[1]{\relax}
+  \newcommand{\Comment}[1]{\relax}
+  \newcommand{\Critical}[1]{\relax}
+\fi
+
+%% Force the footer on pages which normally don't use a footer, such as
+%% for the table of contents, first pages of chapters, etc.
+\def\draftfooter{\ifUKa@draft\thispagestyle{fancy}\fi}
+
+%%  Don't vertically justify the page.
+\raggedbottom
+
+%%  Dump to the log file the important dimensions.
+\typeout{dimension: columnwidth \the\columnwidth}
+\typeout{dimension: textwidth   \the\textwidth}
+\typeout{dimension: textheight  \the\textheight}
+\typeout{dimension: paperwidth  \the\paperwidth}
+\typeout{dimension: paperheight \the\paperheight}
+\typeout{dimension: hoffset     \the\hoffset}
+\typeout{dimension: voffset     \the\voffset}
+\typeout{dimension: topmargin   \the\topmargin}
+\typeout{dimension: headheight  \the\headheight}
+\typeout{dimension: headsep     \the\headsep}
+
+% Units:
+% in - inches
+% mm - millimeters
+% cm - centimeters
+% pt - points (about 1/72.27inch)
+% em - approximately the width of an "M" in the current font
+% ex - approximately the height of an "x" in the current font
+% pc - pica (12pt/pc)
+% bp - big pt (72bp/in)
+% dd - didot (1157dd=1238pt)
+% cc - cicero (12dd/cc)
+% sp - scaled point (65536sp/pt)
+

@@ -1,0 +1,6 @@
+/git.tex
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
